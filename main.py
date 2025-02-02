@@ -1031,7 +1031,7 @@ Project Codename: Paradox"""
                     printerror(f"Error: Command \"{cmd}\" not found")
             else:
                 pass
-        except (EOFError, KeyboardInterrupt):
+        except (EOFError, KeyboardInterrupt, RuntimeError):
             print()
             exit_command([])
             break
