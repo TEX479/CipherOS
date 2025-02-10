@@ -535,56 +535,6 @@ def scannet(argsraw:list[str]):
         console.print(table)
     networkmap_save()
 
-@api.command(aliases=["cd"], desc="Change to a directory")
-def chdir(argsraw:list[str]):
-    parser = ArgumentParser(api, description="Change to a directory")
-    parser.add_argument("path",argtype=str,required=True,help_text="Directory to move to")
-
-    args = parser.parse_args(argsraw)
-
-    #If the --help (-h) is passes it kills the rest of the script
-    if parser.help_flag:
-        return None
-
-    if not hasattr(args, "path"):
-        path = "~"
-    else:
-        path: str = args.path # type: ignore
-    if not isinstance(path, str):
-        raise TypeError(f"Type of 'path' ({type(path)}) does not match expected type (str)") # type: ignore
-    
-    if not path == "~":
-        if os.path.isdir(path):
-            os.chdir(path)
-        else:
-            printerror(f"Error: {path} is a file")
-        api.pwd = os.getcwd()
-    else:
-        api.pwd = os.path.expanduser("~")
-        os.chdir(api.pwd)
-    api.updatecompletions()
-
-@api.command(desc="Makes a directory")
-def mkdir(argsraw:list[str]):
-    parser = ArgumentParser(api, description="Makes a directory")
-    parser.add_argument("path",argtype=str,required=True,help_text="Directory to create")
-
-    #If the --help (-h) is passes it kills the rest of the script
-    if parser.help_flag:
-        return None
-
-    args = parser.parse_args(argsraw)
-    if not hasattr(args, "folder"):
-        raise AttributeError(f"Argument 'folder' missing.")
-    folder: str = args.folder # type: ignore
-    if not isinstance(folder, str):
-        raise TypeError(f"Type of 'path' ({type(folder)}) does not match expected type (str)") # type: ignore
-    
-    if os.path.exists(folder):
-        os.mkdir(folder)
-    else:
-        printerror(f"Error: {folder} exists")
-
 @api.command(aliases=["cls"], desc="Clears the screen")
 def clear(args:list[str]):
     print("\033c", end="")
@@ -697,6 +647,27 @@ def plugins(argsraw:list[str]):
     else:
         print("Unknown subcommand.")
 
+@api.command(name="python", aliases=["py"], desc="Executes a python file")
+def pythoncode(argsraw:list[str]):
+    parser = ArgumentParser(api,description="Executes a python file")
+    parser.add_argument("file", argtype=str, help_text="The file to display", required=True)
+    
+    args = parser.parse_args(argsraw)
+
+    #If the --help (-h) is passes it kills the rest of the script
+    if parser.help_flag:
+        return None
+
+    if not hasattr(args, "file"):
+        raise AttributeError(f"Argument 'file' missing.")
+    file: str = args.file # type: ignore
+    if not isinstance(file, str):
+        raise TypeError(f"Type of 'file' ({type(file)}) does not match expected type (str)") # type: ignore
+    
+    runpy.run_path(file)
+
+### Filesystem commands
+
 @api.command(desc="List the contents of a path in a tree-like structure, making it easier to read.")
 def tree(argsraw:list[str]):
     parser = ArgumentParser(api, description="List the contents of a path in a tree-like structure, making it easier to read.")
@@ -800,25 +771,6 @@ def touch(argsraw:list[str]):
             file,
             "exists" + colorama.Fore.RESET + colorama.Style.NORMAL,
         )
-        
-@api.command(name="python", aliases=["py"], desc="Executes a python file")
-def pythoncode(argsraw:list[str]):
-    parser = ArgumentParser(api,description="Executes a python file")
-    parser.add_argument("file", argtype=str, help_text="The file to display", required=True)
-    
-    args = parser.parse_args(argsraw)
-
-    #If the --help (-h) is passes it kills the rest of the script
-    if parser.help_flag:
-        return None
-
-    if not hasattr(args, "file"):
-        raise AttributeError(f"Argument 'file' missing.")
-    file: str = args.file # type: ignore
-    if not isinstance(file, str):
-        raise TypeError(f"Type of 'file' ({type(file)}) does not match expected type (str)") # type: ignore
-    
-    runpy.run_path(file)
 
 @api.command(aliases=["cat"], desc="Echos a file's contents to the console")
 def viewfile(argsraw:list[str]):
@@ -914,6 +866,74 @@ def rmdir(argsraw:list[str]):
         printerror(f"Error: Permission to delete '{file}' denied")
     except FileNotFoundError:
         printerror(f"Error: '{file}' does not exist.")
+
+@api.command(aliases=["cd"], desc="Change to a directory")
+def chdir(argsraw:list[str]):
+    parser = ArgumentParser(api, description="Change to a directory")
+    parser.add_argument("path",argtype=str,required=True,help_text="Directory to move to")
+
+    args = parser.parse_args(argsraw)
+
+    #If the --help (-h) is passes it kills the rest of the script
+    if parser.help_flag:
+        return None
+
+    if not hasattr(args, "path"):
+        path = "~"
+    else:
+        path: str = args.path # type: ignore
+    if not isinstance(path, str):
+        raise TypeError(f"Type of 'path' ({type(path)}) does not match expected type (str)") # type: ignore
+    
+    if not path == "~":
+        if os.path.isdir(path):
+            os.chdir(path)
+        else:
+            printerror(f"Error: {path} is a file")
+        api.pwd = os.getcwd()
+    else:
+        api.pwd = os.path.expanduser("~")
+        os.chdir(api.pwd)
+    api.updatecompletions()
+
+@api.command(desc="Makes a directory")
+def mkdir(argsraw:list[str]):
+    parser = ArgumentParser(api, description="Makes a directory")
+    parser.add_argument("path",argtype=str,required=True,help_text="Directory to create")
+
+    #If the --help (-h) is passes it kills the rest of the script
+    if parser.help_flag:
+        return None
+
+    args = parser.parse_args(argsraw)
+    if not hasattr(args, "folder"):
+        raise AttributeError(f"Argument 'folder' missing.")
+    folder: str = args.folder # type: ignore
+    if not isinstance(folder, str):
+        raise TypeError(f"Type of 'path' ({type(folder)}) does not match expected type (str)") # type: ignore
+    
+    if os.path.exists(folder):
+        os.mkdir(folder)
+    else:
+        printerror(f"Error: {folder} exists")
+
+@api.command()
+def chmod(argsraw:list[str]):
+    parser = ArgumentParser(api, description="Changes permissions to a file")
+    parser.add_argument("path",argtype=str,required=True,help_text="Path to file")
+    parser.add_argument("perm",argtype=str,required=True,help_text="Permissions")
+    
+    if parser.help_flag:
+        return None
+
+    args = parser.parse_args(argsraw)
+    
+    try:
+        os.chmod(args.path, args.perm)
+    except PermissionError:
+        printerror(f"Error: Permission to change '{args.path}' permissions denied")
+    except FileNotFoundError:
+        printerror(f"Error: '{args.path}' does not exist.")
 
 if __name__ == "__main__":
     debugmode = executeargs.debug
