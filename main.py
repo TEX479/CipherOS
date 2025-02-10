@@ -906,34 +906,46 @@ def mkdir(argsraw:list[str]):
         return None
 
     args = parser.parse_args(argsraw)
-    if not hasattr(args, "folder"):
+    if not hasattr(args, "path"):
         raise AttributeError(f"Argument 'folder' missing.")
-    folder: str = args.folder # type: ignore
-    if not isinstance(folder, str):
-        raise TypeError(f"Type of 'path' ({type(folder)}) does not match expected type (str)") # type: ignore
+    path: str = args.path # type: ignore
+    if not isinstance(path, str):
+        raise TypeError(f"Type of 'path' ({type(path)}) does not match expected type (str)") # type: ignore
     
-    if os.path.exists(folder):
-        os.mkdir(folder)
+    if os.path.exists(path):
+        os.mkdir(path)
     else:
-        printerror(f"Error: {folder} exists")
+        printerror(f"Error: {path} exists")
 
 @api.command()
 def chmod(argsraw:list[str]):
     parser = ArgumentParser(api, description="Changes permissions to a file")
     parser.add_argument("path",argtype=str,required=True,help_text="Path to file")
-    parser.add_argument("perm",argtype=str,required=True,help_text="Permissions")
+    parser.add_argument("perm",argtype=int,required=True,help_text="Permissions")
     
     if parser.help_flag:
         return None
 
     args = parser.parse_args(argsraw)
+
+    if not hasattr(args, "path"):
+        raise AttributeError(f"Argument 'folder' missing.")
+    path: str = args.path # type: ignore
+    if not isinstance(path, str):
+        raise TypeError(f"Type of 'path' ({type(path)}) does not match expected type (str)") # type: ignore
+    
+    if not hasattr(args, "perm"):
+        raise AttributeError(f"Argument 'folder' missing.")
+    perm: str = args.perm # type: ignore
+    if not isinstance(perm, int):
+        raise TypeError(f"Type of 'perm' ({type(perm)}) does not match expected type (int)") # type: ignore
     
     try:
-        os.chmod(args.path, args.perm)
+        os.chmod(path, perm)
     except PermissionError:
-        printerror(f"Error: Permission to change '{args.path}' permissions denied")
+        printerror(f"Error: Permission to change '{path}' permissions denied")
     except FileNotFoundError:
-        printerror(f"Error: '{args.path}' does not exist.")
+        printerror(f"Error: '{path}' does not exist.")
 
 if __name__ == "__main__":
     debugmode = executeargs.debug
